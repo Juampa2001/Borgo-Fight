@@ -1,0 +1,25 @@
+<!doctype html><html lang="it"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Borgo Fight</title><style>:root{color-scheme:dark}body{margin:0;background:#0e2638;color:#e9eef2;font:16px/1.6 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}main{max-width:760px;margin:0 auto;padding:28px 20px 60px}h1{font-size:1.6em;margin:.2em 0}h2{font-size:1.15em;margin:1.6em 0 .4em;color:#f0c46a}p,li{text-align:justify;hyphens:auto}a{color:#f0c46a}.top{display:flex;justify-content:space-between;align-items:center;gap:12px}button{background:#1d3a52;color:#e9eef2;border:1px solid #3a5a74;border-radius:8px;padding:6px 12px;cursor:pointer;font:inherit}.ph{background:#5a3b10;padding:0 4px;border-radius:4px}small{opacity:.75}</style></head><body><main>
+<div class="top"><a href="./">← Borgo Fight</a><button id="sw"></button></div>
+<section data-l="it"><h1>Termini d'uso</h1><p><small>Ultimo aggiornamento: <span class="ph" data-k="date">[data]</span></small></p>
+<p>Borgo Fight è un gioco offerto da <span class="ph" data-k="owner">[nome e cognome del titolare]</span>, contattabile a <span class="ph" data-k="email">[email]</span>. Usando il gioco accetti questi termini.</p>
+<h2>Uso del gioco</h2><p>Il gioco sullo stesso dispositivo è libero. Per creare o entrare in partite online serve il codice della versione free, che è personale e non va diffuso.</p>
+<h2>Comportamento</h2><ul><li>Non scrivere in chat insulti, minacce, contenuti razzisti, sessuali o illegali, né dati personali di altri.</li>
+<li>Non barare: non modificare il gioco, il database o le comunicazioni per ottenere un vantaggio.</li>
+<li>Non usare il gioco per inviare pubblicità o spam.</li></ul>
+<p>Puoi bloccare e segnalare i giocatori dalla chat. Chi viola queste regole può essere escluso dal gioco online.</p>
+<h2>Il servizio</h2><p>Il gioco è offerto così com'è, senza garanzia che funzioni sempre senza interruzioni o errori. Possiamo cambiarlo, sospenderlo o chiuderlo. Nei limiti consentiti dalla legge, non rispondiamo di danni indiretti dovuti all'uso del gioco.</p>
+<h2>Contenuti</h2><p>Il gioco, la mappa, la grafica e i testi appartengono al titolare. I nomi delle armate e i messaggi restano di chi li scrive, che ne è responsabile.</p>
+<h2>Legge applicabile</h2><p>Questi termini seguono la legge italiana. Restano validi i diritti che la legge del tuo paese ti riconosce come consumatore.</p>
+<p>Per domande scrivi a <span class="ph" data-k="email">[email]</span>.</p></section>
+<section data-l="en" hidden><h1>Terms of use</h1><p><small>Last updated: <span class="ph" data-k="date">[date]</span></small></p>
+<p>Borgo Fight is a game offered by <span class="ph" data-k="owner">[owner full name]</span>, reachable at <span class="ph" data-k="email">[email]</span>. By using the game you accept these terms.</p>
+<h2>Using the game</h2><p>Playing on the same device is free. To create or join online games you need the free version code, which is personal and must not be shared.</p>
+<h2>Behavior</h2><ul><li>Do not write insults, threats, racist, sexual or illegal content in chat, or other people's personal data.</li>
+<li>Do not cheat: do not change the game, the database or the communications to gain an advantage.</li>
+<li>Do not use the game to send advertising or spam.</li></ul>
+<p>You can block and report players from the chat. Players who break these rules may be excluded from online play.</p>
+<h2>The service</h2><p>The game is offered as it is, with no guarantee that it always works without interruptions or errors. We may change, suspend or close it. To the extent allowed by law, we are not liable for indirect damage caused by using the game.</p>
+<h2>Content</h2><p>The game, map, graphics and texts belong to the owner. Army names and messages belong to the people who write them, who are responsible for them.</p>
+<h2>Applicable law</h2><p>These terms follow Italian law. The rights that the law of your country gives you as a consumer remain valid.</p>
+<p>For questions write to <span class="ph" data-k="email">[email]</span>.</p></section>
+</main><script>const L=(navigator.language||'en').toLowerCase().startsWith('it')?'it':'en';function show(l){document.querySelectorAll('[data-l]').forEach(e=>e.hidden=e.dataset.l!==l);document.documentElement.lang=l;document.getElementById('sw').textContent=l==='it'?'English':'Italiano';document.getElementById('sw').onclick=()=>show(l==='it'?'en':'it');}show(L);</script><script src="config.js"></script><script>const C=window.BORGO_CONFIG||{},M={owner:C.ownerName,email:C.ownerEmail,date:C.legalDate};document.querySelectorAll(".ph").forEach(e=>{const v=M[e.dataset.k];if(v){e.textContent=v;e.classList.remove("ph");}});</script></body></html>
