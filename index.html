@@ -428,6 +428,50 @@ textarea{font:inherit;font-size:16px;padding:9px 10px;border-radius:10px;border:
 .namechip{cursor:pointer;font:inherit;color:inherit}
 .namechip .pen{color:var(--muted);font-size:13px;margin-left:-2px}
 .spchip{font-weight:700}
+
+/* durante pan e zoom si nascondono onde, fasce di costa e rosa dei venti: la mappa scorre più fluida su telefono */
+#map.mv #coast,#map.mv #seawaves,#map.mv #rose,#map.mv #leaders{display:none}
+#coast{shape-rendering:optimizeSpeed}
+/* nomi dei territori: contrasto indipendente dal tema (sulla TV con tema chiaro si leggevano male) */
+:root{--lab-fill:#0b1620; --lab-halo:rgba(255,255,255,.92)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--lab-fill:#e6edf2; --lab-halo:#0e2638}}
+:root[data-theme="dark"]{--lab-fill:#e6edf2; --lab-halo:#0e2638}
+.tlabel{fill:var(--lab-fill)!important;stroke:var(--lab-halo)!important;font-weight:800}
+
+/* ---- schermo TV ---- */
+body.tvmode #shell{grid-template-columns:minmax(0,1fr) min(30vw,560px)}
+body.tvmode #topbar .iconbtn,body.tvmode #topbar select,body.tvmode #zoombar,body.tvmode #actionBox,body.tvmode #side .tabs,body.tvmode #pane-chat,body.tvmode #objDock,body.tvmode #cardDock,body.tvmode #side .handle,body.tvmode #dice,body.tvmode .nextlink,body.tvmode #tip{display:none!important}
+body.tvmode #side{overflow:hidden;gap:10px}
+body.tvmode #pane-players{display:block!important;flex:0 0 auto;max-height:46%;overflow:hidden}
+body.tvmode #pane-log{display:block!important;flex:1 1 auto;min-height:0;overflow:hidden}
+@media (min-width:1500px){ body.tvmode #side{zoom:1.3} body.tvmode #topbar{zoom:1.3} }
+#tvExit{position:fixed;bottom:10px;right:10px;z-index:60;opacity:.3;font:inherit;font-size:13px;font-weight:700;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--panel);color:var(--ink);cursor:pointer}
+#tvExit:hover,#tvExit:focus{opacity:.95}
+.tvpick{display:flex;justify-content:space-between;align-items:center;gap:12px;width:100%;text-align:left}
+.tvpick small{color:var(--muted);font-weight:600}
+#tvfx{position:absolute;inset:0;z-index:30;display:none;flex-direction:column;align-items:center;justify-content:center;gap:3.5vh;pointer-events:none;color:#fff;background:radial-gradient(ellipse at center,rgba(6,14,22,.8),rgba(6,14,22,.94))}
+#tvfx.on{display:flex;animation:tvin .35s ease both} #tvfx.out{opacity:0;transition:opacity .4s}
+@keyframes tvin{from{opacity:0}to{opacity:1}}
+#tvfx .tvsides{display:flex;align-items:center;justify-content:center;gap:3vw;width:100%;padding:0 3vw}
+#tvfx .tvside{flex:1 1 0;text-align:center;min-width:0}
+#tvfx .army{display:inline-block;padding:.3em .9em;border-radius:999px;font-weight:800;font-size:clamp(16px,2.3vw,44px);box-shadow:0 4px 18px rgba(0,0,0,.45)}
+#tvfx .terr{font-weight:900;font-size:clamp(22px,3.8vw,72px);margin-top:.35em;line-height:1.05;text-shadow:0 3px 16px #000;overflow-wrap:anywhere}
+#tvfx .tvswords{position:relative;flex:0 0 auto;width:clamp(150px,19vw,360px);height:clamp(150px,19vw,360px)}
+#tvfx.on .tvswords{animation:tvshake .32s .62s}
+#tvfx .sword{position:absolute;inset:0;width:100%;height:100%;filter:drop-shadow(0 6px 10px rgba(0,0,0,.55))}
+#tvfx .sw1{animation:swA .9s cubic-bezier(.3,.7,.3,1) both} #tvfx .sw2{animation:swB .9s cubic-bezier(.3,.7,.3,1) both}
+@keyframes swA{0%{transform:translateX(-170%) rotate(15deg);opacity:0}15%{opacity:1}64%{transform:translateX(3%) rotate(53deg)}80%{transform:translateX(0) rotate(45deg)}100%{transform:translateX(0) rotate(45deg)}}
+@keyframes swB{0%{transform:translateX(170%) rotate(-15deg);opacity:0}15%{opacity:1}64%{transform:translateX(-3%) rotate(-53deg)}80%{transform:translateX(0) rotate(-45deg)}100%{transform:translateX(0) rotate(-45deg)}}
+@keyframes tvshake{0%,100%{transform:translate(0)}20%{transform:translate(-9px,4px)}40%{transform:translate(8px,-5px)}60%{transform:translate(-6px,3px)}80%{transform:translate(4px,-2px)}}
+#tvfx .spark{position:absolute;left:50%;top:50%;width:80%;height:80%;margin:-40% 0 0 -40%;border-radius:50%;background:radial-gradient(circle,#fff 0,#ffe082 28%,rgba(255,160,40,0) 68%);opacity:0;animation:tvspark .75s .6s ease-out both}
+@keyframes tvspark{0%{opacity:0;transform:scale(.2)}25%{opacity:1;transform:scale(1)}100%{opacity:0;transform:scale(1.9)}}
+#tvfx .tvdice{display:flex;justify-content:space-between;align-items:center;width:calc(66vw / 2.2);zoom:2.2}
+@media (min-width:1500px){ #tvfx .tvdice{zoom:3.1;width:calc(66vw / 3.1)} }
+#tvfx .tvdice .drow{gap:10px}
+#tvfx .tvres{font-weight:900;font-size:clamp(20px,3.2vw,60px);text-shadow:0 3px 16px #000;transition:opacity .4s;min-height:1.2em;text-align:center;padding:0 3vw}
+#tvfx .tvres.conq{color:#f4c430}
+#tvfx.calm .sword,#tvfx.calm .spark,#tvfx.calm .tvswords{animation:none!important}
+#tvfx.calm .sw1{transform:rotate(45deg)} #tvfx.calm .sw2{transform:rotate(-45deg)}
 </style>
 </head>
 <body>
@@ -1495,6 +1539,16 @@ Object.assign(I18N.en,{"b.rename": "Rename game", "b.saveName": "Save name", "sp
 Object.assign(I18N.es,{"b.rename": "Cambiar nombre", "b.saveName": "Guardar nombre", "spec.title": "Has sido eliminado", "spec.body": "Puedes quedarte a mirar la partida como espectador o salir de ella. Como espectador lo ves todo, también el objetivo secreto y las cartas de quien juega su turno, pero ya no puedes usar el chat.", "spec.watch": "Quedarme como espectador", "spec.leave": "Salir de la partida", "spec.badge": "Espectador", "spec.objWait": "El objetivo de {p0} aparecerá en cuanto {p0} tenga el juego abierto.", "spec.noChat": "Los espectadores no pueden escribir en el chat."});
 Object.assign(I18N.fr,{"b.rename": "Renommer la partie", "b.saveName": "Enregistrer le nom", "spec.title": "Tu as été éliminé", "spec.body": "Tu peux rester regarder la partie en spectateur ou la quitter. En spectateur tu vois tout, y compris l’objectif secret et les cartes de celui qui joue son tour, mais tu ne peux plus utiliser le chat.", "spec.watch": "Rester en spectateur", "spec.leave": "Quitter la partie", "spec.badge": "Spectateur", "spec.objWait": "L’objectif de {p0} apparaîtra dès que {p0} aura le jeu ouvert.", "spec.noChat": "Les spectateurs ne peuvent pas écrire dans le chat."});
 Object.assign(I18N.de,{"b.rename": "Spiel umbenennen", "b.saveName": "Namen speichern", "spec.title": "Du bist ausgeschieden", "spec.body": "Du kannst als Zuschauer weiter zusehen oder das Spiel verlassen. Als Zuschauer siehst du alles, auch den geheimen Auftrag und die Karten von dem, der gerade am Zug ist, aber du kannst den Chat nicht mehr benutzen.", "spec.watch": "Als Zuschauer bleiben", "spec.leave": "Spiel verlassen", "spec.badge": "Zuschauer", "spec.objWait": "Der Auftrag von {p0} erscheint, sobald {p0} das Spiel geöffnet hat.", "spec.noChat": "Zuschauer können nicht im Chat schreiben."});
+Object.assign(I18N.it,{"toast.hostPause": "Solo chi ha creato la partita può mettere in pausa e riprendere.", "pause.hostOnly": "In pausa. Solo chi ha creato la partita può riprendere; se nessuno lo fa, riparte da sola dopo {m} minuti."});
+Object.assign(I18N.en,{"toast.hostPause": "Only the person who created the game can pause and resume.", "pause.hostOnly": "Paused. Only the person who created the game can resume it; if nobody does, it restarts by itself after {m} minutes."});
+Object.assign(I18N.es,{"toast.hostPause": "Solo quien creó la partida puede pausar y reanudar.", "pause.hostOnly": "En pausa. Solo quien creó la partida puede reanudarla; si nadie lo hace, sigue sola tras {m} minutos."});
+Object.assign(I18N.fr,{"toast.hostPause": "Seul le créateur de la partie peut mettre en pause et reprendre.", "pause.hostOnly": "En pause. Seul le créateur de la partie peut reprendre ; si personne ne le fait, elle repart seule après {m} minutes."});
+Object.assign(I18N.de,{"toast.hostPause": "Nur wer die Partie erstellt hat, kann pausieren und fortsetzen.", "pause.hostOnly": "Pausiert. Nur wer die Partie erstellt hat, kann sie fortsetzen; sonst geht sie nach {m} Minuten von selbst weiter."});
+Object.assign(I18N.it,{"tv.btn": "Schermo TV", "tv.title": "Schermo TV", "tv.body": "Scegli la partita da mostrare sulla TV. Questo schermo non mostra obiettivi né carte e non gioca: si gioca dagli altri dispositivi.", "tv.none": "Nessuna partita in corso. Prima fai iniziare la partita dai telefoni.", "tv.exit": "Esci dalla modalità TV"});
+Object.assign(I18N.en,{"tv.btn": "TV screen", "tv.title": "TV screen", "tv.body": "Choose the game to show on the TV. This screen shows no objectives or cards and does not play: everyone plays from their own device.", "tv.none": "No game in progress. Start the game from the phones first.", "tv.exit": "Leave TV mode"});
+Object.assign(I18N.es,{"tv.btn": "Pantalla TV", "tv.title": "Pantalla TV", "tv.body": "Elige la partida que se mostrará en la tele. Esta pantalla no muestra objetivos ni cartas y no juega: se juega desde los demás dispositivos.", "tv.none": "No hay partidas en curso. Primero empieza la partida desde los móviles.", "tv.exit": "Salir del modo TV"});
+Object.assign(I18N.fr,{"tv.btn": "Écran TV", "tv.title": "Écran TV", "tv.body": "Choisis la partie à afficher sur la télé. Cet écran ne montre ni objectifs ni cartes et ne joue pas : on joue depuis les autres appareils.", "tv.none": "Aucune partie en cours. Lance d’abord la partie depuis les téléphones.", "tv.exit": "Quitter le mode TV"});
+Object.assign(I18N.de,{"tv.btn": "TV-Bildschirm", "tv.title": "TV-Bildschirm", "tv.body": "Wähle die Partie, die auf dem Fernseher gezeigt wird. Dieser Bildschirm zeigt keine Aufträge oder Karten und spielt nicht mit: gespielt wird auf den anderen Geräten.", "tv.none": "Keine laufende Partie. Starte die Partie zuerst auf den Handys.", "tv.exit": "TV-Modus verlassen"});
 </script>
 
 <script>// ===== Filtro parole (elenchi propri, 25 lingue): blocca insulti e parolacce anche mascherati =====
@@ -2466,6 +2520,7 @@ function actMoveGeneral(s,pid,from,to){
 }
 </script>
 <script>// ===== Borgo Fight: interfaccia =====
+var tvMode=false, tvWake=null;   // modalità schermo TV (solo online)
 const $=s=>document.querySelector(s);
 const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const W=MAP.W, H=MAP.H, NS='http://www.w3.org/2000/svg';
@@ -2565,7 +2620,7 @@ function buildMap(){
   const sd=el('defs',{},svg);
   const wp=el('pattern',{id:'pat-waves',patternUnits:'userSpaceOnUse',width:170,height:110},sd);
   wp.innerHTML='<path class="wave" d="M14 24 q6 -6 12 0 t12 0 t12 0 M96 62 q6 -6 12 0 t12 0 M44 94 q5 -5 10 0 t10 0 M128 16 q5 -5 10 0 t10 0"/>';
-  el('rect',{x:-W,y:-H,width:3*W,height:3*H,fill:'url(#pat-waves)','pointer-events':'none'},g);
+  el('rect',{id:'seawaves',x:-W,y:-H,width:3*W,height:3*H,fill:'url(#pat-waves)','pointer-events':'none'},g);
   const K=W/(2*Math.PI), my=l=>1.25*Math.log(Math.tan(Math.PI/4+0.4*l*Math.PI/180)), YM=my(84);
   const grid=el('g',{stroke:'var(--grid)',fill:'none'},g);
   for(let lon=-180;lon<=180;lon+=15){ const x=(lon+180)/360*W; el('line',{x1:x,y1:0,x2:x,y2:H,'vector-effect':'non-scaling-stroke','stroke-width':1},grid); }
@@ -2649,6 +2704,7 @@ function applyVB(){
   const r=sr(); if(!r.width) return;
   if(!rzPending) lastScale=r.width/vb.w;   // grandezza attuale della mappa sullo schermo (pixel per unità)
   svg.setAttribute('viewBox',`${vb.x} ${vb.y} ${vb.w} ${vb.h}`);
+  svg.classList.add('mv'); clearTimeout(applyVB.t); applyVB.t=setTimeout(()=>svg.classList.remove('mv'),160);
   layoutMap(r);
   positionDice();
 }
@@ -2682,6 +2738,25 @@ function layoutMap(r){
     // il centro del disegno coincide con il punto interno del territorio
     A.x=A.ax-(A.bx1+A.bx2)/2; A.y=A.ay-(A.by1+A.by2)/2; }
   const leaders=$('#leaders'); leaders.innerHTML='';
+  { const vi=items.filter(i=>i.vis); for(const A of vi){ A.x0=A.x; A.y0=A.y; }
+    const maxD=Wt*1.5, gap=2;
+    for(let it=0; it<40; it++){ let moved=false;
+      for(let i=0;i<vi.length;i++) for(let j=i+1;j<vi.length;j++){
+        const A=vi[i], B=vi[j];
+        const ox=Math.min(A.x+A.bx2,B.x+B.bx2)-Math.max(A.x+A.bx1,B.x+B.bx1)+gap;
+        const oy=Math.min(A.y+A.by2,B.y+B.by2)-Math.max(A.y+A.by1,B.y+B.by1)+gap;
+        if(ox<=0 || oy<=0) continue; moved=true;
+        const ca={x:A.x+(A.bx1+A.bx2)/2,y:A.y+(A.by1+A.by2)/2}, cb={x:B.x+(B.bx1+B.bx2)/2,y:B.y+(B.by1+B.by2)/2};
+        if(oy<=ox){ const d=oy/2+0.5, sg=ca.y<=cb.y?-1:1; A.y+=sg*d; B.y-=sg*d; }
+        else { const d=ox/2+0.5, sg=ca.x<=cb.x?-1:1; A.x+=sg*d; B.x-=sg*d; }
+      }
+      for(const A of vi){ const dx=A.x-A.x0, dy=A.y-A.y0, dd=Math.hypot(dx,dy); if(dd>maxD){ A.x=A.x0+dx/dd*maxD; A.y=A.y0+dy/dd*maxD; } }
+      if(!moved) break;
+    }
+    // chi si è spostato di parecchio: lineetta e puntino sul punto vero del territorio
+    for(const A of vi){ const dd=Math.hypot(A.x-A.x0,A.y-A.y0); tokEl[A.id].classList.toggle('moved',dd>=Wt*0.22); if(dd<Wt*0.22) continue;
+      const cx=A.x+(A.bx1+A.bx2)/2, cy=A.y+(A.by1+A.by2)/2, c1=vb.x+cx/z, c2=vb.y+cy/z, a1=vb.x+A.ax/z, a2=vb.y+A.ay/z;
+      leaders.insertAdjacentHTML('beforeend',`<line x1="${a1}" y1="${a2}" x2="${c1}" y2="${c2}" stroke="#13202b" stroke-opacity=".7" stroke-width="${1.6/z}" stroke-linecap="round"/><circle cx="${a1}" cy="${a2}" r="${2.6/z}" fill="#fff" stroke="#13202b" stroke-width="${1.2/z}"/>`); } }
   const rects=[];
   for(const A of items){
     const mx=vb.x+A.x/z, my=vb.y+A.y/z;
@@ -2724,7 +2799,7 @@ function fit(){
   if($('#shell').classList.contains('menu') && MOBILE()) return fitMenu();
   const r=sr(); if(!r.width||!r.height) return;
   // margini: a destra i pulsanti dello zoom, in alto la barra, in basso i riquadri di obiettivo e carte
-  const inGame=!$('#shell').classList.contains('menu'), ml=inGame?8:0, mr=inGame?64:0, mt=inGame?56:0, mb=inGame?52:0;
+  const inGame=!$('#shell').classList.contains('menu'), ml=inGame?8:0, mr=inGame?(tvMode?10:64):0, mt=inGame?56:0, mb=inGame?(tvMode?10:52):0;
   const aw=Math.max(80,r.width-ml-mr), ah=Math.max(80,r.height-mt-mb), s=Math.min(aw/W, ah/H);
   vb.w=r.width/s; vb.h=r.height/s; vb.x=W/2-(ml+aw/2)/s; vb.y=H/2-(mt+ah/2)/s; fitW=vb.w;
   // zoom iniziale solo sui telefoni
@@ -2748,6 +2823,8 @@ function gCommit(){ if(!gs) return; gs=null; if(vbRaf){ cancelAnimationFrame(vbR
 // tocco: se il dito è sulla terra vale quel territorio; il numero delle truppe conta solo quando il cerchio è sul mare;
 // sul mare vicino a una costa vale il territorio più vicino
 function tapTid(e){
+  // una pedina spostata (per non sovrapporsi a un'altra) può stare sopra un territorio vicino: se tocchi il suo disegno vale il suo territorio
+  const tk=e.target.closest?.('.tok'); if(tk){ const tr=e.target.tagName==='rect' && e.target.getAttribute('fill')==='transparent'; if(!tr || tk.classList.contains('moved')) return tk.dataset.tid; }
   const land=tidAt(e.clientX,e.clientY,true); if(land) return land;
   const tok=e.target.closest?.('.tok')?.dataset.tid; if(tok) return tok;
   return e.target.closest?.('[data-tid]')?.dataset.tid || tidAt(e.clientX,e.clientY);
@@ -2882,6 +2959,7 @@ function showDicePartial(pa){
 function showDice(r){
   window.diceBusyUntil=Date.now()+2900;
   if(!r.preview) try{ shipAttack(r); }catch(e){ console.error(e); }
+  if(tvMode && !r.preview) try{ tvBattle(r); }catch(e){ console.error(e); }
   // lancio in due tempi: prima i dadi dell'attaccante, poi quelli del difensore, poi il confronto coppia per coppia
   const box=trayShow(`<div class="drow" id="dRowA"><span class="who">${esc(pName(r.by))}</span>${r.a.map((_,i)=>dieHTML(RED,r.aMod&&i===0)).join('')}</div>
     <div class="drow dwait" id="dRowD"><span class="who">${esc(pName(r.def))}</span>${r.d.map((_,i)=>dieHTML(BLUE,r.dMod&&i===0)).join('')}</div>
@@ -2990,12 +3068,18 @@ function vehicleSVG(n,C,K){
     <circle cx="-22.2" cy="-14.4" r="2.1" fill="${D}" ${st}/>
     <circle cx="-1.6" cy="7.6" r="4.6" fill="${K}"/><circle cx="-1.6" cy="7.6" r="2.4" fill="#5d6870"/><circle cx="-1.6" cy="7.6" r=".9" fill="${K}"/></g>`;
   }
-  return `<path d="M-31 4.5 L-31 -5.5 L-12 -5.5 L-12 4.5 Z" fill="${C}" ${st}/>
-    <path d="M-29 -3.4 L-14 -3.4 M-29 -1 L-14 -1 M-29 1.4 L-14 1.4" stroke="${K}" stroke-width=".7" opacity=".5"/>
-    <path d="M-12 4.5 L-12 -7 L-5 -7 L-3.2 -2.6 L1.6 -1.6 L1.6 4.5 Z" fill="${C}" ${st}/><rect x="-10.4" y="-5.6" width="4.4" height="3" rx=".6" fill="${K}" opacity=".55"/>
-    <rect x="-11" y="-10.4" width="5" height="3" rx="1" fill="${C}" ${st}/><path d="M-6.5 -9.4 L1.5 -12" stroke="${K}" stroke-width="1.7" stroke-linecap="round"/>
-    <rect x="0" y="-0.2" width="1.7" height="1.6" rx=".5" fill="#ffe08a"/>
-    ${wheelSVG(-25,K,4.1)}${wheelSVG(-17,K,4.1)}${wheelSVG(-3.4,K,4.1)}`;
+  { // cannone da campo: affusto con coda, scudo, ruota a raggi e bocca da fuoco leggermente alzata
+    const D=shade(C,-0.4), L=shade(C,0.32);
+    return `<path d="M-6 3.6 L-27.5 8.6 L-27.5 11 L-5 7.4 Z" fill="${C}" ${st}/><path d="M-27.5 8.6 L-30 11.4 L-25.8 11.4 Z" fill="${K}"/>
+    <g transform="rotate(-15 -9 -1)"><path d="M-16 -3.6 L10 -2.5 L12.2 -3.5 L12.2 1.5 L10 0.6 L-16 2.8 Z" fill="${C}" ${st}/>
+      <path d="M-13 -3.2 L-13 2.4 M-8.5 -3 L-8.5 2.2 M10 -2.4 L10 0.5" stroke="${K}" stroke-width=".8" opacity=".6"/>
+      <rect x="9.6" y="-3.9" width="3.8" height="5.8" rx=".9" fill="${L}" ${st}/><ellipse cx="13.4" cy="-1" rx=".9" ry="2" fill="${K}"/>
+      <circle cx="-16.4" cy="-0.4" r="3.1" fill="${D}" ${st}/></g>
+    <path d="M-12.4 -5.4 L-5.6 -4.4 L-4.4 7 L-12 7 Z" fill="${D}" ${st}/><path d="M-10.6 -2.6 L-6.6 -2.2" stroke="${L}" stroke-width="1"/>
+    <path d="M-8.4 -1.6 L-7.8 -0.2 L-6.3 -0.2 L-7.5 0.7 L-7 2.2 L-8.4 1.3 L-9.8 2.2 L-9.3 0.7 L-10.5 -0.2 L-9 -0.2 Z" fill="#fff"/>
+    <circle cx="-8" cy="5.4" r="6.4" fill="${K}"/><circle cx="-8" cy="5.4" r="4.7" fill="#6a7780"/><circle cx="-8" cy="5.4" r="3.2" fill="${K}" opacity=".35"/>
+    <path d="M-8 0.7 L-8 10.1 M-12.7 5.4 L-3.3 5.4 M-11.3 2.1 L-4.7 8.7 M-11.3 8.7 L-4.7 2.1" stroke="${K}" stroke-width=".9"/><circle cx="-8" cy="5.4" r="1.5" fill="#cdd5da" stroke="${K}" stroke-width=".8"/>
+    <ellipse cx="-22" cy="9.3" rx="2.2" ry="1.3" fill="#c9a24a" stroke="${K}" stroke-width=".8"/><circle cx="-22" cy="9.3" r=".5" fill="${K}"/>`; }
 }
 // generale: ufficiale a cavallo accanto al mezzo, nel colore del giocatore, con stellina d'oro sul petto
 function riderSVG(C,K,x,y,sc){
@@ -3114,6 +3198,37 @@ function airStrike(f){
   });
   return HIT+350;
 }
+
+
+// ---- schermo TV: ogni attacco a tutto schermo (chi attacca chi, due spade che si scontrano, dadi, esito) ----
+const tvQ=[]; let tvBusy=false;
+function tvBattle(r){ tvQ.push(r); if(tvQ.length>3) tvQ.splice(0,tvQ.length-3); if(!tvBusy) tvNext(); }
+function swordSVG(grip,cls){ const K='#1d232a';
+  return `<svg class="sword ${cls}" viewBox="0 0 40 170" aria-hidden="true"><path d="M20 2 L27.5 15 L26.5 108 L13.5 108 L12.5 15 Z" fill="#e3ebf1" stroke="${K}" stroke-width="2.4" stroke-linejoin="round"/><path d="M20 7 L20 106" stroke="#9fb0bd" stroke-width="2"/><path d="M3 110 Q20 101 37 110 L37 119 Q20 112 3 119 Z" fill="#e0a82a" stroke="${K}" stroke-width="2.4" stroke-linejoin="round"/><rect x="15.5" y="119" width="9" height="33" rx="3.5" fill="${grip}" stroke="${K}" stroke-width="2.4"/><path d="M15.5 128 H24.5 M15.5 136 H24.5 M15.5 144 H24.5" stroke="${K}" stroke-width="1.3" opacity=".6"/><circle cx="20" cy="158" r="8" fill="#e0a82a" stroke="${K}" stroke-width="2.4"/></svg>`; }
+function tvNext(){
+  const r=tvQ.shift(); if(!r || !tvMode){ tvBusy=false; return; } tvBusy=true;
+  let ov=$('#tvfx'); if(!ov){ ov=document.createElement('div'); ov.id='tvfx'; $('#stage').appendChild(ov); }
+  const ca=pColor(r.by).hex, cd=pColor(r.def).hex, reduce=matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const ink=h=>{ const n=parseInt(h.slice(1),16), l=0.299*(n>>16)+0.587*((n>>8)&255)+0.114*(n&255); return l>150?'#13202b':'#fff'; };
+  ov.className=''; ov.innerHTML=`<div class="tvsides">
+      <div class="tvside"><span class="army" style="background:${ca};color:${ink(ca)}">${esc(pName(r.by))}</span><div class="terr">${esc(tn(r.from))}</div></div>
+      <div class="tvswords">${swordSVG(ca,'sw1')}${swordSVG(cd,'sw2')}<i class="spark"></i></div>
+      <div class="tvside"><span class="army" style="background:${cd};color:${ink(cd)}">${esc(pName(r.def))}</span><div class="terr">${esc(tn(r.to))}</div></div></div>
+    <div class="tvdice"><div class="drow" id="tvA">${r.a.map((_,i)=>dieHTML(RED,r.aMod&&i===0)).join('')}</div><div class="drow dwait" id="tvD">${r.d.map((_,i)=>dieHTML(BLUE,r.dMod&&i===0)).join('')}</div></div>
+    <div class="tvres" style="opacity:0"></div>`;
+  ov.offsetHeight; ov.className='on'+(reduce?' calm':'');
+  const rowA=ov.querySelector('#tvA'), rowD=ov.querySelector('#tvD'), dA=[...rowA.querySelectorAll('.die')], dD=[...rowD.querySelectorAll('.die')];
+  const throwIn=(dies,vals,side)=>dies.forEach((d,i)=>{ d.style.animation=`${side} .6s ${i*0.09}s cubic-bezier(.22,.9,.32,1.25) backwards`; spin(d.querySelector('.cube'),vals[i],true,i); });
+  const T0=reduce?200:1250;
+  setTimeout(()=>throwIn(dA,r.a,'dthrowL'),T0);
+  setTimeout(()=>{ rowD.classList.remove('dwait'); throwIn(dD,r.d,'dthrowR'); },T0+1250);
+  setTimeout(()=>{
+    r.res.forEach((w,i)=>{ const win=w==='a'?dA[i]:dD[i], lose=w==='a'?dD[i]:dA[i]; win&&win.classList.add('win'); lose&&lose.classList.add('lost'); });
+    const res=ov.querySelector('.tvres'); if(!res) return; res.style.opacity=1; res.textContent=r.conq?t('dice.conq',{t0:tn(r.to)}):t('dice.res',{a:r.aL,b:r.dL}); if(r.conq) res.classList.add('conq');
+  },T0+2650);
+  setTimeout(()=>{ ov.classList.add('out'); },T0+5400);
+  setTimeout(()=>{ ov.className=''; ov.innerHTML=''; tvBusy=false; tvNext(); },T0+5850);
+}
 // ---------------- azioni ----------------
 function act(fn,...args){
   if(S && S.paused){ toast(t('toast.isPaused')); return false; }
@@ -3151,12 +3266,17 @@ function dbError(e){
   else if(c==='resource_exhausted') toast(t('toast.rate'));
   else toast(t('toast.net'));
 }
-function pauseGame(){
+const PAUSE_MAX=10*60000;   // una pausa dimenticata si toglie da sola dopo 10 minuti
+function isHost(){ return mode==='local' || (!!S && S.hostId===me.id); }
+function pauseExpired(){ return !!(S && S.paused && Date.now()-S.paused.at>=PAUSE_MAX); }
+function pauseGame(silent){
   if(!S || S.status!=='playing' || S.paused || !inGame()) return false;
+  if(!isHost()){ if(!silent) toast(t('toast.hostPause')); return false; }
   S.paused={by:actorOrMe(), at:Date.now()}; log(S,'pause',[actorOrMe()]); S.seq++; ui.sel=null; ui.target=null; ui.power=null; return true;
 }
 function resumeGame(){
   if(!S || !S.paused) return;
+  if(!isHost() && !pauseExpired()){ toast(t('toast.hostPause')); return; }
   const d=Date.now()-S.paused.at;
   if(S.turnDeadline) S.turnDeadline+=d; S.startedAt+=d;
   if(S.pendingAttack){ S.pendingAttack.deadline+=d; S.pendingAttack.since+=d; }
@@ -3164,7 +3284,7 @@ function resumeGame(){
 }
 function actorOrMe(){ return mode==='local' ? curPid(S) : me.id; }
 function saveExit(){
-  if(S && S.status==='playing' && inGame()){ if(pauseGame()) commit(); }
+  if(S && S.status==='playing' && inGame()){ if(pauseGame(true)) commit(); }
   toast(t('toast.saved')); leaveGame();
 }
 function onTerr(tid){
@@ -3248,7 +3368,7 @@ function renderTop(){
     if(S.settings.taEnd==='time'){ const ms=S.startedAt+S.settings.taMinutes*60000-Date.now(); extra=`<span class="chip">Time Attack <span class="timer" id="gtmr">${fmtTime(ms)}</span></span>`; }
     else extra=`<span class="chip">${S.deck.length} / ${S.reshuffles}·${S.settings.taReshuffles}</span>`;
   }
-  const m=MOBILE(), canPause=inGame() && S.status==='playing';
+  const m=MOBILE(), canPause=inGame() && S.status==='playing' && isHost();
   $('#topbar').innerHTML=`
     <div class="row" style="gap:6px;align-items:flex-start">
       ${m?'':`${mode==='local'?`<button class="chip namechip" id="bGName" title="${esc(t('b.rename'))}">`:'<span class="chip">'}<span class="stencil" style="font-size:20px">${esc(S.name||'Borgo Fight')}</span>${mode==='local'?'<span class="pen">✎</span>':''}<span style="color:var(--muted)">${esc(t('top.round',{r:S.round}))}</span>${mode==='local'?'</button>':'</span>'}`}
@@ -3284,7 +3404,7 @@ function renderAction(){
   const mine=canAct() && cp===pid;
   let a='';
   if(S.status==='finished') a=`<p><b>${esc(t('act.finished'))}</b></p><button class="btn" id="bWin">${esc(t('act.seeResult'))}</button>`;
-  else if(S.paused) a=`<p><b>${esc(t('pause.title'))}</b> ${t('pause.by',{p0:pTag(S.paused.by)})}</p>${inGame()?`<button class="btn primary" id="bResume">${esc(t('pause.resume'))}</button>`:''}`;
+  else if(S.paused) a=`<p><b>${esc(t('pause.title'))}</b> ${t('pause.by',{p0:pTag(S.paused.by)})}</p>${inGame()&&(isHost()||pauseExpired())?`<button class="btn primary" id="bResume">${esc(t('pause.resume'))}</button>`:inGame()?`<p class="note">${esc(t('pause.hostOnly',{m:Math.round(PAUSE_MAX/60000)}))}</p>`:''}`;
   else if(S.pendingAttack){ const pa=S.pendingAttack; a=`<p>${t('act.pending',{p0:pTag(pa.att),t0:esc(tn(pa.to)),p1:pTag(pa.def)})} ${esc(pa.stage==='def'?t('act.pendingDef'):t('log.defend',{p0:pName(pa.def),n:pa.dd||(pa.d||[]).length}))}</p>`; }
   else if(simSetup() && inGame()){ a=simSetupBox(); }
   else if(!mine){ const spect=mode==='online' && !inGame(); a=`<p>${spect?esc(t('act.watch'))+' ':''}${t('act.wait',{p0:pTag(cp),ph:esc(phaseName(S.phase))})}</p>`; }
@@ -3895,7 +4015,7 @@ function renderHome(){
         const lbl=g.status==='lobby'?t('b.openLobby'):mineIn&&g.status==='playing'?t('b.resume'):t('b.watch');
         return `<div class="game"><span><b>${esc(g.name||'')}</b><br><small style="color:var(--muted)">${esc(st)}</small></span><span class="gbtns"><button class="btn" data-open="${esc(g.gid)}">${esc(lbl)}</button>${g.hostId===me.id?`<button class="btn danger" data-gdel="${esc(g.gid)}" aria-label="${esc(t('lobby.del'))}" title="${esc(t('lobby.del'))}">🗑</button>`:''}</span></div>`; }).join('')
         : `<p class="note">${esc(t('online.none'))}</p>`}</div>
-      <button class="btn primary" id="hNew" ${canWrite===false?'disabled':''}>${esc(t('online.create'))}</button></div>`
+      <button class="btn primary" id="hNew" ${canWrite===false?'disabled':''}>${esc(t('online.create'))}</button><button class="btn" id="hTv">📺 ${esc(t('tv.btn'))}</button></div>`
     : `<div class="box"><h2>${esc(t('online.title'))}</h2><p class="note">${esc(t(BORGO_CONFIG.platform==='claude'?'online.off':'online.offWeb'))}</p></div>`;
   const savedH = saved.length ? `<h4>${esc(t('saves.title'))}</h4><div class="games">${saved.map(([id,x])=>{
       const names=x.state.order.map(p=>x.state.players[p].name).join(', ');
@@ -3913,6 +4033,7 @@ function renderHome(){
   $('#hLocal').onclick=localSetup; $('#hRules').onclick=showRules; $('#hExtras').onclick=()=>{ exTab='rules'; showExtras(renderHome); };
   $('#hNew')&&($('#hNew').onclick=createOnline);
   const joinCode=()=>{ const c=($('#hCode').value||'').trim().toUpperCase(); const g=gamesList.find(x=>x.code===c); if(!g) return toast(t('toast.codeNotFound')); openOnline(g.gid, g.status==='lobby'); };
+  $('#hTv')&&($('#hTv').onclick=openTvPicker);
   $('#hJoin')&&($('#hJoin').onclick=joinCode); $('#hCode')&&($('#hCode').onkeydown=e=>{ if(e.key==='Enter') joinCode(); });
   document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openOnline(b.dataset.open));
   document.querySelectorAll("[data-gdel]").forEach(b=>b.onclick=()=>{ const g=gamesList.find(x=>x.gid===b.dataset.gdel); askYesNo(t("home.delQ",{name:g?g.name:""}),async()=>{ try{ await db.doc("games/"+b.dataset.gdel).delete(); gamesList=gamesList.filter(x=>x.gid!==b.dataset.gdel); renderHome(); }catch(e){ dbError(e); } }); });
@@ -4088,6 +4209,7 @@ function startOnline(){
   startView(); queueWrite();
 }
 function leaveGame(){
+  stopTv();
   unsubGame&&unsubGame(); unsubPlayers&&unsubPlayers(); unsubGame=unsubPlayers=null;
   chat.subs.forEach(u=>u()); chat.subs=[]; chat.gid=null;
   closeModal(); $('#dice').hidden=true; ui.sel=null; ui.target=null; ui.power=null;
@@ -4137,6 +4259,10 @@ async function setLang(l){
   if(wasRules) showRules();
 }
 
+// pausa dimenticata: dopo 10 minuti riprende il creatore; se è assente, uno degli altri qualche secondo dopo
+const apDelay=Math.floor(Math.random()*20000);
+setInterval(()=>{ if(mode!=='online' || !S || S.status!=='playing' || !S.paused || !inGame()) return;
+  const late=Date.now()-S.paused.at-PAUSE_MAX-(S.hostId===me.id?0:25000+apDelay); if(late>=0) resumeGame(); },5000);
 // ---------------- timer ----------------
 let forcedSetup=null;
 setInterval(()=>{
@@ -4232,13 +4358,39 @@ async function shareObjWithSpectators(){
   objSending=false;
 }
 
+
+// ---------------- schermo TV: un dispositivo guarda la partita senza obiettivi né carte, a tutto schermo ----------------
+// non è un giocatore: entra come chi guarda ("Guarda"), quindi non vede niente di segreto e non conta tra gli utenti online
+function openTvPicker(){
+  if(!onlineReady) return;
+  const list=(gamesList||[]).filter(g=>g.status==='playing');
+  const rows=list.map(g=>`<button class="btn tvpick" data-tvg="${esc(g.gid)}"><b>${esc(g.name||'')}</b><small>${esc(t('st.playing',{r:g.round}))}</small></button>`).join('');
+  modal(`<h2>📺 ${esc(t('tv.title'))}</h2><p class="note">${esc(t('tv.body'))}</p><div class="col">${rows||`<p class="note">${esc(t('tv.none'))}</p>`}</div><div class="row"><button class="btn" id="tvNo">${esc(t('b.cancel'))}</button></div>`); modalKind='tvpick';
+  $('#tvNo').onclick=closeModal;
+  document.querySelectorAll('[data-tvg]').forEach(b=>b.onclick=()=>startTv(b.dataset.tvg));
+}
+async function startTv(gid){
+  closeModal(); tvMode=true; document.body.classList.add('tvmode');
+  if(!$('#tvExit')){ const x=document.createElement('button'); x.id='tvExit'; x.type='button'; x.textContent='✕ '+t('tv.exit'); x.onclick=leaveGame; document.body.appendChild(x); }
+  try{ db.doc('profiles/'+me.id).set({seen:0,at:'tv'}); }catch(e){}   // la TV non conta tra gli utenti online
+  openOnline(gid);
+  try{ if(navigator.wakeLock) tvWake=await navigator.wakeLock.request('screen'); }catch(e){}
+  [300,900,2000].forEach(ms=>setTimeout(()=>{ if(tvMode) fit(); },ms));
+}
+function stopTv(){
+  if(!tvMode && !document.body.classList.contains('tvmode')) return;
+  tvMode=false; document.body.classList.remove('tvmode'); try{ tvWake&&tvWake.release(); }catch(e){} tvWake=null;
+  const x=$('#tvExit'); if(x) x.remove(); const o=$('#tvfx'); if(o) o.remove();
+}
+document.addEventListener('visibilitychange',async()=>{ if(tvMode && document.visibilityState==='visible'){ try{ if(navigator.wakeLock) tvWake=await navigator.wakeLock.request('screen'); }catch(e){} } });
+
 // ---------------- persone online sul sito (in qualsiasi partita) ----------------
 // ognuno aggiorna ogni minuto il proprio documento profiles/<id> con l'ora in cui è stato visto e dove si trova;
 // online = visto negli ultimi 2 minuti e mezzo. Sul sito la regola di Firebase per profiles c'è già: non serve cambiarla.
 const ONL_WIN=150000; let onlS={list:[], at:0, busy:false, beatAt:0, place:'', names:{}};
 function onlPlace(){ if(S && mode==='online' && gameId) return 'game'; if(S && mode==='local') return 'local'; return 'home'; }
 async function onlBeat(force){
-  if(!onlineReady || canWrite===false || document.visibilityState==='hidden') return;
+  if(tvMode || !onlineReady || canWrite===false || document.visibilityState==='hidden') return;
   const place=onlPlace(), now=Date.now(); if(!force && place===onlS.place && now-onlS.beatAt<20000) return;
   onlS.place=place; onlS.beatAt=now;
   const d={seen:now, at:place}; if(place==='game' && S && S.name) d.g=String(S.name).slice(0,40);
