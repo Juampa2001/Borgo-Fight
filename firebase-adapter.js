@@ -6,7 +6,15 @@
   let ready=null;
   function init(){ if(ready) return ready; ready=(async()=>{
     const app=await import(base+'firebase-app.js'), fs=await import(base+'firebase-firestore.js'), au=await import(base+'firebase-auth.js'), fn=await import(base+'firebase-functions.js');
-    const a=app.initializeApp(cfg), db=fs.getFirestore(a), auth=au.getAuth(a), funcs=fn.getFunctions(a, (window.BORGO_CONFIG||{}).region||'europe-west1');
+    const a=app.initializeApp(cfg);
+    // App Check: Google controlla di nascosto che le richieste arrivino dal vero sito del gioco e non da programmi estranei.
+    // La chiave è pubblica (Fraud Defense / reCAPTCHA Enterprise, valida solo sul dominio registrato). Va avviato prima del database.
+    const ack=(window.BORGO_CONFIG||{}).appCheckKey||'6LejXAouAAAAABltvI2fmPD_Y_vnceHP7SRHvUpW';
+    if(ack && /(^|\.)juampa2001\.github\.io$/.test(location.hostname)){
+      try{ const ac=await import(base+'firebase-app-check.js'); ac.initializeAppCheck(a,{provider:new ac.ReCaptchaEnterpriseProvider(ack), isTokenAutoRefreshEnabled:true}); }
+      catch(e){ console.warn('App Check non avviato',e); }
+    }
+    const db=fs.getFirestore(a), auth=au.getAuth(a), funcs=fn.getFunctions(a, (window.BORGO_CONFIG||{}).region||'europe-west1');
     const user=auth.currentUser || (await au.signInAnonymously(auth)).user;   // accesso anonimo: nessuna registrazione
     return {fs,db,uid:user.uid,fn,funcs};
   })(); return ready; }

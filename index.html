@@ -537,6 +537,11 @@ body.tvmode .tvwait .title{white-space:normal;width:auto;max-width:92vw}
 #shell.mapfull .abgrip::before{content:"";position:absolute;left:50%;top:7px;width:42px;height:5px;margin-left:-21px;border-radius:3px;background:var(--muted);opacity:.7}
 
 .adminon{border-color:#e0a82a!important;color:#e0a82a}
+
+/* App Check: il distintivo di reCAPTCHA non deve coprire i pulsanti della mappa (la nota obbligatoria è in fondo alla home) */
+.grecaptcha-badge{visibility:hidden!important}
+.rcnote{font-size:11px;opacity:.6;text-align:center;margin-top:10px}
+.rcnote a{color:inherit}
 </style>
 </head>
 <body>
@@ -1656,6 +1661,11 @@ Object.assign(I18N.en,{"adm.btn": "Admin", "adm.badge": "Admin on", "adm.title":
 Object.assign(I18N.es,{"adm.btn": "Administrador", "adm.badge": "Administrador activo", "adm.title": "Acceso de administrador", "adm.body": "Solo para quien gestiona el juego: permite eliminar cualquier partida online. Los demás solo pueden eliminar las partidas que han creado.", "adm.ph": "Contraseña de administrador", "adm.ok": "Entrar", "adm.bad": "Contraseña no válida.", "adm.on": "Acceso de administrador activo en este dispositivo.", "adm.off": "Salir de administrador"});
 Object.assign(I18N.fr,{"adm.btn": "Administrateur", "adm.badge": "Administrateur actif", "adm.title": "Accès administrateur", "adm.body": "Seulement pour qui gère le jeu : permet de supprimer n’importe quelle partie en ligne. Les autres ne peuvent supprimer que les parties qu’ils ont créées.", "adm.ph": "Mot de passe administrateur", "adm.ok": "Entrer", "adm.bad": "Mot de passe incorrect.", "adm.on": "Accès administrateur actif sur cet appareil.", "adm.off": "Quitter le mode administrateur"});
 Object.assign(I18N.de,{"adm.btn": "Administrator", "adm.badge": "Administrator aktiv", "adm.title": "Administratorzugang", "adm.body": "Nur für die Person, die das Spiel betreut: damit lässt sich jede Online-Partie löschen. Alle anderen können nur ihre eigenen Partien löschen.", "adm.ph": "Administratorpasswort", "adm.ok": "Anmelden", "adm.bad": "Falsches Passwort.", "adm.on": "Administratorzugang auf diesem Gerät aktiv.", "adm.off": "Administrator abmelden"});
+Object.assign(I18N.it,{"rc.note": "Questo sito è protetto da reCAPTCHA: valgono le {p} e i {t} di Google.", "rc.priv": "Norme sulla privacy", "rc.terms": "Termini di servizio"});
+Object.assign(I18N.en,{"rc.note": "This site is protected by reCAPTCHA and the Google {p} and {t} apply.", "rc.priv": "Privacy Policy", "rc.terms": "Terms of Service"});
+Object.assign(I18N.es,{"rc.note": "Este sitio está protegido por reCAPTCHA y se aplican la {p} y las {t} de Google.", "rc.priv": "Política de privacidad", "rc.terms": "Condiciones del servicio"});
+Object.assign(I18N.fr,{"rc.note": "Ce site est protégé par reCAPTCHA ; les {p} et les {t} de Google s’appliquent.", "rc.priv": "Règles de confidentialité", "rc.terms": "Conditions d’utilisation"});
+Object.assign(I18N.de,{"rc.note": "Diese Website ist durch reCAPTCHA geschützt; es gelten die {p} und die {t} von Google.", "rc.priv": "Datenschutzerklärung", "rc.terms": "Nutzungsbedingungen"});
 </script>
 
 <script>// ===== Filtro parole (elenchi propri, 25 lingue): blocca insulti e parolacce anche mascherati =====
@@ -4428,7 +4438,7 @@ function renderHome(){
     ${onl}
     <div class="box"><h2>${esc(t('local.title'))}</h2><p class="note">${esc(t('local.note'))}</p>${savedH}
       <div class="row"><button class="btn primary" id="hLocal">${esc(t('b.new'))}</button></div></div>
-    <div class="row"><button class="btn" id="hExtras">${esc(t('b.extras'))}</button><button class="btn" id="hRules">${esc(t('b.rules'))}</button><button class="btn" id="hFb">✉ ${esc(t('fb.btn'))}</button>${onlineReady&&BORGO_CONFIG.platform!=='claude'?`<button class="btn ${isAdmin?'adminon':''}" id="hAdmin">🔑 ${esc(t(isAdmin?'adm.badge':'adm.btn'))}</button>`:''}${ACCESS.mode!=='off'?(isUnlocked()?`<span class="chip okchip">✓ ${esc(t('code.badge'))}</span>`:`<button class="btn" id="hCodeP">🎟 ${esc(t('code.btn'))}</button>`):''}</div>${(window.BORGO_CONFIG||{}).platform==='web'?`<p class="legal"><a href="privacy.html" target="_blank" rel="noopener">${esc(t('legal.privacy'))}</a> · <a href="terms.html" target="_blank" rel="noopener">${esc(t('legal.terms'))}</a></p>`:''}`);
+    <div class="row"><button class="btn" id="hExtras">${esc(t('b.extras'))}</button><button class="btn" id="hRules">${esc(t('b.rules'))}</button><button class="btn" id="hFb">✉ ${esc(t('fb.btn'))}</button>${onlineReady&&BORGO_CONFIG.platform!=='claude'?`<button class="btn ${isAdmin?'adminon':''}" id="hAdmin">🔑 ${esc(t(isAdmin?'adm.badge':'adm.btn'))}</button>`:''}${ACCESS.mode!=='off'?(isUnlocked()?`<span class="chip okchip">✓ ${esc(t('code.badge'))}</span>`:`<button class="btn" id="hCodeP">🎟 ${esc(t('code.btn'))}</button>`):''}</div>${onlineReady&&BORGO_CONFIG.platform!=='claude'?`<p class="rcnote">${esc(t('rc.note',{p:'\u0001',t:'\u0002'})).replace('\u0001',`<a href="https://policies.google.com/privacy" target="_blank" rel="noopener">${esc(t('rc.priv'))}</a>`).replace('\u0002',`<a href="https://policies.google.com/terms" target="_blank" rel="noopener">${esc(t('rc.terms'))}</a>`)}</p>`:''}${(window.BORGO_CONFIG||{}).platform==='web'?`<p class="legal"><a href="privacy.html" target="_blank" rel="noopener">${esc(t('legal.privacy'))}</a> · <a href="terms.html" target="_blank" rel="noopener">${esc(t('legal.terms'))}</a></p>`:''}`);
   if(onlineReady){ const sl=document.querySelector('.screenlang'); if(sl){ sl.insertAdjacentHTML('beforeend',`<button class="onlbtn" id="hOnl" type="button" aria-label="${esc(t('onl.aria',{n:onlS.at?onlS.list.length:'…'}))}">${onlBtnHTML()}</button>`); $('#hOnl').onclick=showOnline; } onlBeat(); }
   $('#hCodeP')&&($('#hCodeP').onclick=()=>askCode(renderHome));
   $('#hFb').onclick=showFeedback; $('#hAdmin')&&($('#hAdmin').onclick=showAdmin);
