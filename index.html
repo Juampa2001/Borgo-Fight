@@ -2,6 +2,7 @@
 <html lang="it">
 <head>
 <meta charset="utf-8">
+<meta name="color-scheme" content="dark light">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, interactive-widget=resizes-content">
 <meta name="theme-color" content="#0e2638">
 <meta name="description" content="Borgo Fight: conquista il mondo territorio dopo territorio, con dadi, carte e un obiettivo segreto. Gioca con gli amici sullo stesso dispositivo o online.">
@@ -12,7 +13,11 @@
 <title>Borgo Fight</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&family=Big+Shoulders+Stencil+Display:wght@700;800&display=swap" rel="stylesheet">
-<style>:root{
+<style>/* tema chiaro e scuro gestiti dal gioco: niente inversione automatica dei colori da parte del browser */
+:root{color-scheme:light dark}
+:root[data-theme="light"]{color-scheme:light}
+:root[data-theme="dark"]{color-scheme:dark}
+:root{
   --ocean:#cfe1ea; --ocean-deep:#b9d3e0; --grid:#a8c3d2; --land:#b8b3a6; --coast:#8fb2c5; --ink:#13202b; --muted:#536473;
   --panel:#f6f8f9; --panel-2:#e8eef1; --line:#c5d1d8; --brass:#9a6a12; --brass-bg:#f1d9a6; --danger:#b3261e;
   --shadow:0 8px 24px rgba(15,35,55,.18); --border-terr:#24323d;
@@ -251,9 +256,9 @@ label.f{font-size:13px}
 .huntring.sure{fill:rgba(244,196,48,.3);stroke-width:3;stroke-dasharray:none}
 .huntbox{display:flex;flex-direction:column;gap:3px;background:var(--brass-bg);border-radius:10px;padding:8px 10px;font-size:13px;line-height:1.35}
 
-#map.dragging .tlabel,#map.dragging #leaders,#toksvg.dragging .tlabel,#toksvg.dragging #leaders{visibility:hidden}
+/* (durante il trascinamento la mappa non cambia più stile: si muove come immagine) */
 #map{shape-rendering:geometricPrecision}
-#map.dragging{shape-rendering:optimizeSpeed}
+/* (durante il trascinamento la mappa non cambia più stile: si muove come immagine) */
 
 .langsel{max-width:96px}
 .pbar{height:10px;border-radius:5px;background:var(--panel-2);overflow:hidden}.pbar i{display:block;height:100%;background:var(--brass);transition:width .3s}
@@ -525,7 +530,7 @@ body.tvmode .tvwait .title{white-space:normal;width:auto;max-width:92vw}
    così quando cambia il suo contenuto il browser non ricalcola anche la mappa (era il blocco di 1-2 s a ogni mossa sui dispositivi lenti) */
 #side{contain:strict}
 @media (max-width:900px){ #side:not(.collapsed){height:42dvh} #side.collapsed{contain:content} }
-@media (max-width:900px) and (orientation:landscape) and (max-height:520px){ #side,#side.collapsed{height:100dvh;contain:strict} }
+@media (max-width:900px) and (orientation:landscape) and (max-height:520px){ #side:not(.collapsed),#side.collapsed{height:100dvh;contain:strict} }
 #shell.mapfull #side{contain:none!important;height:auto;will-change:auto!important}   /* a schermo intero il riquadro si trascina fuori dal contenitore: niente ritaglio */
 /* pannello e barra su livelli propri: ridipingerli non tocca la mappa (nei browser senza scheda grafica le tessere coprono tutta la larghezza) */
 #side,#topbar{will-change:transform}
@@ -542,6 +547,20 @@ body.tvmode .tvwait .title{white-space:normal;width:auto;max-width:92vw}
 .grecaptcha-badge{visibility:hidden!important}
 .rcnote{font-size:11px;opacity:.6;text-align:center;margin-top:10px}
 .rcnote a{color:inherit}
+
+.dhrow .dh>span:first-child{overflow:hidden;text-overflow:ellipsis;white-space:nowrap;min-width:0}
+.dhx .dhxi{display:none}
+@media (max-width:900px){ .dhx .dhxt{display:none} .dhx .dhxi{display:inline} .dhx{padding:4px 9px;font-size:15px;line-height:1} }
+/* telefono: fasce lungo le coste più sottili (sugli schermi piccoli coprivano mari stretti come Mediterraneo e Baltico) */
+@media (max-width:900px){
+  .cband.cl1{stroke-width:15px} .cband.sh1{stroke-width:14px} .cband.cl2{stroke-width:9px} .cband.sh2{stroke-width:8px} .cband.cl3{stroke-width:4.5px} .cband.sh3{stroke-width:3.5px}
+  #seawaves{opacity:.55}
+}
+
+/* gesto in corso: i quattro livelli della mappa si muovono come immagini (scheda grafica), senza ridisegno */
+#map,#seasvg,#toksvg,#fxsvg{transform-origin:0 0}
+#mapwrap{position:absolute;inset:0;transform-origin:0 0}
+#stage.gest #mapwrap{will-change:transform}
 </style>
 </head>
 <body>
@@ -2794,7 +2813,7 @@ function buildMap(){
   { const o=document.getElementById('toksvg'); if(o) o.remove(); const ts=document.createElementNS(NS,'svg'); ts.id='toksvg'; ts.setAttribute('preserveAspectRatio','xMidYMid meet'); ts.setAttribute('aria-hidden','true');
     svg.parentNode.insertBefore(ts,svg.nextSibling); for(const id of ['leaders','labels','tokens']){ const n=document.getElementById(id); if(n) ts.appendChild(n); } }   // anche gli anelli pulsanti dei bersagli: prima facevano ridisegnare la mappa di continuo
   requestAnimationFrame(()=>{ for(const t of MAP.terr){ try{ const b=terrEl[t.id].getBBox(); tbox[t.id]={w:b.width,h:b.height}; }catch(e){ tbox[t.id]={w:40,h:40}; } } });
-  setupPanZoom();
+  wrapLayers(); setupPanZoom();
 }
 // pedina: compatta da lontano, con bandierine (10 armate) e carri (1 armata) quando ti avvicini
 function tokenSVG(n,c,lod,gen,cap,chest,pearl,mine,wire){
@@ -2837,8 +2856,7 @@ function applyVB(){
   if(!rzPending) lastScale=r.width/vb.w;   // grandezza attuale della mappa sullo schermo (pixel per unità)
   const vbs=`${vb.x} ${vb.y} ${vb.w} ${vb.h}`;
   if(vbs!==applyVB.last){   // solo se la vista è cambiata davvero: nascondere e rimostrare il mare costa un ridisegno completo
-    applyVB.last=vbs; setAllVB(vbs); const sea=document.getElementById('seasvg'), ts=document.getElementById('toksvg');
-    svg.classList.add('mv'); sea&&sea.classList.add('mv'); ts&&ts.classList.add('mv'); clearTimeout(applyVB.t); applyVB.t=setTimeout(()=>{ svg.classList.remove('mv'); sea&&sea.classList.remove('mv'); ts&&ts.classList.remove('mv'); },160); }
+    applyVB.last=vbs; setAllVB(vbs); }
   else setAllVB(vbs);
   layoutMap(r);
   positionDice();
@@ -2848,7 +2866,7 @@ function setH(e,h){ if(e._h!==h){ e.innerHTML=h; e._h=h; } }
 function layoutMap(r){
   const z=r.width/vb.w, fz=r.width/fitW, rel=Math.log2(Math.max(1,z/fz));
   const playing=S && S.owner && S.status!=='lobby';
-  const lod = rel>=1.3 ? 1 : 0; layoutState.lod=lod;
+  const lod = rel>=(MOBILE()?3.2:1.3) ? 1 : 0; layoutState.lod=lod;
   const compact = (Math.min(84, Math.max(24, Math.min(46, 70*fz))*(1+0.62*rel)))<34;   // da lontano: solo il numero
   const cfs=Math.max(24,13/z); const cg=$('#contlabels'); cg.style.display = rel>=1.5 ? 'none' : ''; setA(cg,'font-size',cfs); setA(cg,'stroke-width',5/z);
   for(const tx of cg.children){ const c=MAP.conts[[...cg.children].indexOf(tx)]; let w=0; try{ w=tx.getComputedTextLength(); }catch(_){ }
@@ -2916,7 +2934,7 @@ function layoutMap(r){
     let ok=false, bx=0, by=0;
     const p=pos[id];
     if(p && p.vis && (forced || w<=tw*1.15+6)){
-      const hgt=lines.length*lh; const tokTop=p.y-(lod?Wt*0.6:Wt*0.3), tokBot=p.y+Wt*0.27;
+      const hgt=lines.length*lh; const own=rects.find(q=>q.id===id); const tokTop=own?own.y1:p.y-(lod?Wt*0.6:Wt*0.3), tokBot=own?own.y2:p.y+Wt*0.27;
       for(const cy of [tokTop-3-hgt, tokBot+3]){
         const R={x1:p.x-w/2-2,x2:p.x+w/2+2,y1:cy,y2:cy+hgt,id};
         if(R.y1<44||R.y2>r.height-4||R.x1<2||R.x2>r.width-2){ if(!forced) continue; }
@@ -2937,7 +2955,7 @@ function fit(){
   if($('#shell').classList.contains('menu') && MOBILE()) return fitMenu();
   const r=sr(); if(!r.width||!r.height) return;
   // margini: a destra i pulsanti dello zoom, in alto la barra, in basso i riquadri di obiettivo e carte
-  const inGame=!$('#shell').classList.contains('menu'), ml=inGame?8:0, mr=inGame?(tvMode?10:64):0, mt=inGame?56:0, mb=inGame?(tvMode?10:52):0;
+  const inGame=!$('#shell').classList.contains('menu'), full=$('#shell').classList.contains('mapfull'), ml=inGame?8:0, mr=inGame?(tvMode?10:64):0, mt=inGame?(full?10:56):0, mb=inGame?(tvMode||full?10:52):0;
   const aw=Math.max(80,r.width-ml-mr), ah=Math.max(80,r.height-mt-mb), s=Math.min(aw/W, ah/H);
   vb.w=r.width/s; vb.h=r.height/s; vb.x=W/2-(ml+aw/2)/s; vb.y=H/2-(mt+ah/2)/s; fitW=vb.w;
   // zoom iniziale solo sui telefoni
@@ -2949,8 +2967,24 @@ function fit(){
 let gs=null, commitTimer=null, vbRaf=0;
 // tutti i livelli della mappa (mare, territori, pedine, animazioni) cambiano vista sempre insieme, nello stesso istante
 const VB_LAYERS=['seasvg','toksvg','fxsvg'];
+function wrapLayers(){ let w=document.getElementById('mapwrap'); if(!w){ w=document.createElement('div'); w.id='mapwrap'; svg.parentNode.insertBefore(w,svg); }
+  for(const id of ['seasvg','map','toksvg','fxsvg']){ const e=document.getElementById(id); if(e && e.parentNode!==w) w.appendChild(e); } }
 function setAllVB(vbs){ svg.setAttribute('viewBox',vbs); for(const id of VB_LAYERS){ const e=document.getElementById(id); if(e && e.getAttribute('viewBox')!==vbs) e.setAttribute('viewBox',vbs); } }
-function scheduleVB(){ if(vbRaf) return; vbRaf=requestAnimationFrame(()=>{ vbRaf=0; setAllVB(`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); positionDice(); }); }
+// durante un gesto (dito, mouse, rotella) i livelli già disegnati vengono solo spostati e ingranditi con la scheda grafica,
+// senza ridisegnare la mappa a ogni movimento; alla fine del gesto si ridisegna una volta sola, nitida
+let gsVB=null;
+function mapLayers(){ const w=document.getElementById('mapwrap'); return w?[w]:[svg, ...VB_LAYERS.map(id=>document.getElementById(id)).filter(Boolean)]; }
+function drawnVB(){ const a=(svg.getAttribute('viewBox')||'').split(/\s+/).map(Number); return a.length===4&&a.every(Number.isFinite)?{x:a[0],y:a[1],w:a[2],h:a[3]}:{...vb}; }
+function gestureStart(){ gsVB=drawnVB(); $('#stage').classList.add('gest'); }
+function gestureEnd(){ gsVB=null; $('#stage').classList.remove('gest'); for(const e of mapLayers()) e.style.transform=''; }
+function scheduleVB(){ if(vbRaf) return; vbRaf=requestAnimationFrame(()=>{ vbRaf=0;
+  if(!gs){ setAllVB(`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); positionDice(); return; }
+  if(!gsVB) gestureStart();
+  const r=sr(); let k=gsVB.w/vb.w, tx=(gsVB.x-vb.x)*r.width/vb.w, ty=(gsVB.y-vb.y)*r.height/vb.h;
+  // se si è scoperta troppa mappa non ancora disegnata, la si ridisegna da qui e si riparte
+  if(Math.abs(tx)>r.width*0.45||Math.abs(ty)>r.height*0.45||k<0.5||k>3){ for(const e of mapLayers()) e.style.transform=''; setAllVB(`${vb.x} ${vb.y} ${vb.w} ${vb.h}`); gsVB={...vb}; k=1; tx=0; ty=0; }
+  const tf=`translate(${tx}px,${ty}px) scale(${k})`; for(const e of mapLayers()) e.style.transform=tf;
+  positionDice(); }); }
 function gPan(dx,dy){ gs=true; const r=sr(); vb.x-=dx*vb.w/r.width; vb.y-=dy*vb.h/r.height; clampVB(); $('#tip').hidden=true; scheduleVB(); }
 function gZoom(px,py,f){
   gs=true; const r=sr(); const fz=r.width/fitW; const z=r.width/vb.w;
@@ -2958,7 +2992,7 @@ function gZoom(px,py,f){
   const mx=vb.x+px/r.width*vb.w, my=vb.y+py/r.height*vb.h;
   vb.w*=k; vb.h*=k; vb.x=mx-px/r.width*vb.w; vb.y=my-py/r.height*vb.h; clampVB(); $('#tip').hidden=true; scheduleVB();
 }
-function gCommit(){ if(!gs) return; gs=null; if(vbRaf){ cancelAnimationFrame(vbRaf); vbRaf=0; } clampVB(); applyVB(); }
+function gCommit(){ if(!gs) return; gs=null; if(vbRaf){ cancelAnimationFrame(vbRaf); vbRaf=0; } clampVB(); gestureEnd(); applyVB(); }
 // territorio sotto il dito: se il tocco cade sul mare vicino a una costa o su una decorazione,
 // prende il territorio più vicino entro pochi pixel (utile per le isole piccole)
 // tocco: se il dito è sulla terra vale quel territorio; il numero delle truppe conta solo quando il cerchio è sul mare;
@@ -2993,14 +3027,14 @@ function setupPanZoom(){
   svg.addEventListener('pointerdown',e=>{
     try{ svg.setPointerCapture(e.pointerId); }catch(_){}
     ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-    if(ptrs.size===1){ moved=0; downTid=tapTid(e); } else moved=99;
+    if(ptrs.size===1){ moved=0; downTid=tapTid(e); } else { moved=99; $('#stage').classList.add('gest'); }   // secondo dito: sta per iniziare uno zoom
   });
   svg.addEventListener('pointermove',e=>{
     if(!ptrs.has(e.pointerId)){ if(e.pointerType==='mouse') hoverTip(e); return; }
     const r=sr();
     if(ptrs.size===1){
       const p=ptrs.get(e.pointerId), dx=e.clientX-p.x, dy=e.clientY-p.y; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});
-      moved+=Math.abs(dx)+Math.abs(dy); if(moved>7){ (svg.classList.add('dragging'),document.getElementById('toksvg')?.classList.add('dragging')); gPan(dx,dy); }
+      moved+=Math.abs(dx)+Math.abs(dy); if(moved>2) $('#stage').classList.add('gest'); if(moved>7){ (svg.classList.add('dragging'),document.getElementById('toksvg')?.classList.add('dragging')); gPan(dx,dy); }
     } else if(ptrs.size===2){
       const [a0,b0]=[...ptrs.values()]; ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY}); const [a1,b1]=[...ptrs.values()];
       const m0={x:(a0.x+b0.x)/2-r.left,y:(a0.y+b0.y)/2-r.top}, m1={x:(a1.x+b1.x)/2-r.left,y:(a1.y+b1.y)/2-r.top};
@@ -3013,6 +3047,7 @@ function setupPanZoom(){
     if(ptrs.size===0){ (svg.classList.remove('dragging'),document.getElementById('toksvg')?.classList.remove('dragging')); gCommit(); if(moved<=7 && downTid) onTerr(downTid); downTid=null; }
   };
   svg.addEventListener('pointerup',up); svg.addEventListener('pointercancel',up);
+  const unprep=()=>setTimeout(()=>{ if(!gs && !gsVB) $('#stage').classList.remove('gest'); },0); svg.addEventListener('pointerup',unprep); svg.addEventListener('pointercancel',unprep);
   svg.addEventListener('pointerleave',e=>{ if(e.pointerType==='mouse') $('#tip').hidden=true; });
   svg.addEventListener('wheel',e=>{ e.preventDefault(); const r=sr(); gZoom(e.clientX-r.left,e.clientY-r.top,Math.exp(-e.deltaY*0.0018)); clearTimeout(commitTimer); commitTimer=setTimeout(gCommit,140); },{passive:false});
   document.addEventListener('gesturestart',e=>e.preventDefault());
@@ -3782,7 +3817,7 @@ function renderTop(){
       ${mode==='online'&&inGame()?`<button class="chip nextchip" id="bChatTop">💬 ${esc(t('tab.chat'))}${chatUnread()?` <span class="badge">${chatUnread()}</span>`:''}</button>`:''}
       ${exOn(S,'seasons')&&S.season?`<button class="chip seasonchip" id="bSeason" title="${esc(t('sed.'+SEASONS[S.season.i],{list:coldList()}))}">${SE_ICON[S.season.i]} ${m?'':esc(t('se.'+SEASONS[S.season.i]))}</button>`:''}
     </div>
-    <div class="tb-btns">${langSelect('langTop')}
+    <div class="tb-btns">${m?'':langSelect('langTop')}
       ${m?`<button class="iconbtn" id="bMenu">Menu</button>`:`${canPause&&!S.paused?`<button class="iconbtn" id="bPause">${esc(t('b.pause'))}</button>`:''}<button class="iconbtn" id="bSnd" title="${esc(t('snd.btn'))}"><span class="sndico">${sndIcon()}</span></button><button class="iconbtn" id="bRules">${esc(t('b.rules'))}</button><button class="iconbtn" id="bSave">${esc(t(canPause?'b.saveExit':'b.exit'))}</button>${mode==='online'&&inGame()&&S.status==='playing'&&!S.eliminated[me.id]&&!isRetired(S,me.id)?`<button class="iconbtn" id="bQuit">${esc(t('b.abandon'))}</button>`:''}`}
     </div>`);
   bindLang('langTop');
@@ -3790,9 +3825,9 @@ function renderTop(){
   on('bSnd',()=>sndPopup($('#bSnd')));
   on('bRules',showRules); on('bGName',askRename); on('bNext',()=>showNextReinf()); on('bChatTop',()=>openChat('all')); on('bQuit',askQuit); on('bSeason',()=>{ const i=S.season.i; toast(t('season.now',{se:t('se.'+SEASONS[i])})+'. '+t('sed.'+SEASONS[i],{list:coldList()})); }); on('bSave',()=>canPause?saveExit():leaveGame());
   on('bPause',()=>{ if(pauseGame()){ commit(); toast(t('toast.paused')); } });
-  on('bMenu',()=>{ modal(`<div class="col">${canPause&&!S.paused?`<button class="btn" id="mmPause">${esc(t('b.pause'))}</button>`:''}<button class="btn" id="mmRules">${esc(t('b.rules'))}</button><div id="mmSnd">${sndCtl()}</div>${mode==='local'?`<button class="btn" id="mmName">✎ ${esc(t('b.rename'))}</button>`:''}
+  on('bMenu',()=>{ modal(`<div class="col"><label class="f">🌐 ${langSelect('langMenu')}</label>${canPause&&!S.paused?`<button class="btn" id="mmPause">${esc(t('b.pause'))}</button>`:''}<button class="btn" id="mmRules">${esc(t('b.rules'))}</button><div id="mmSnd">${sndCtl()}</div>${mode==='local'?`<button class="btn" id="mmName">✎ ${esc(t('b.rename'))}</button>`:''}
       ${mode==='online'&&inGame()&&S.status==='playing'&&!S.eliminated[me.id]&&!isRetired(S,me.id)?`<button class="btn danger" id="mmQuit">${esc(t('b.abandon'))}</button>`:''}<button class="btn primary" id="mmSave">${esc(t(canPause?'b.saveExit':'b.exit'))}</button><button class="btn" id="mmClose">${esc(t('b.close'))}</button></div>`); modalKind='menu';
-    on('mmClose',closeModal); on('mmName',()=>{ closeModal(); askRename(); }); on('mmRules',()=>{ closeModal(); showRules(); }); { const box=$('#mmSnd'); if(box){ const draw=()=>{ box.innerHTML=sndCtl(); bindSndCtl(box,draw); }; bindSndCtl(box,draw); } } on('mmQuit',askQuit); on('mmSave',()=>{ closeModal(); canPause?saveExit():leaveGame(); });
+    bindLang('langMenu'); on('mmClose',closeModal); on('mmName',()=>{ closeModal(); askRename(); }); on('mmRules',()=>{ closeModal(); showRules(); }); { const box=$('#mmSnd'); if(box){ const draw=()=>{ box.innerHTML=sndCtl(); bindSndCtl(box,draw); }; bindSndCtl(box,draw); } } on('mmQuit',askQuit); on('mmSave',()=>{ closeModal(); canPause?saveExit():leaveGame(); });
     on('mmPause',()=>{ closeModal(); if(pauseGame()){ commit(); toast(t('toast.paused')); } }); });
 }
 // nome della partita sullo stesso dispositivo: si può cambiare anche a partita iniziata (resta nel salvataggio)
@@ -4003,8 +4038,9 @@ function renderDocks(){ setTimeout(()=>{ try{ renderInfoBtns(); }catch(_){ } },0
     return `<button class="card ${sy} ${ui.cards.includes(c)?'sel':''} ${own?'own':''}" data-card="${c}" title="${j?esc(t('sym.J')):esc(tn(c))+(own?', '+esc(t('dock.own')):'')}">${cardSVG(sy)}<span>${j?esc(t('sym.J')):esc(tn(c))}</span><small>${esc(t('sym.'+sy))}</small></button>`; }).join('');
   const powers=air?Object.keys(POWERS).filter(k=>pw[k]>0).map(k=>`<div class="pw"><span><b>${esc(t('pw.'+k))}</b>${pw[k]>1?' x'+pw[k]:''}</span><button class="btn sm" data-use="${k}" ${canUse&&!(k==='charge'&&S.charge===hp)?'':'disabled'}>${esc(t(k==='charge'&&S.charge===hp?'dock.active':'dock.use'))}</button></div>`).join(''):'';
   cd.hidden=false; cd.classList.toggle('closed',!ui.cardsOpen);
-  const head=(mode==='local'||spv?t('dock.cardsOf',{p0:pName(hp),n:h.length}):t('dock.cards',{n:h.length}))+(npw?', '+t('dock.powersN',{n:npw}):'');
-  cd.innerHTML=`<div class="dhrow"><button class="dh" id="cTog" aria-expanded="${ui.cardsOpen}"><span>${esc(head)}</span><span>${ui.cardsOpen?'▾':'▸'}</span></button><button class="dhx" id="cComboTop" title="${esc(t('dock.combos'))}">${esc(t('dock.combos'))}</button></div>
+  // sul telefono il titolo è corto (il nome di chi gioca è già nella barra in alto), così il numero di carte resta sempre visibile
+  const head=MOBILE()&&!ui.cardsOpen ? `🃏 ${h.length}${npw?` · ⚡ ${npw}`:''}` : (mode==='local'||spv?t('dock.cardsOf',{p0:pName(hp),n:h.length}):t('dock.cards',{n:h.length}))+(npw?', '+t('dock.powersN',{n:npw}):'');
+  cd.innerHTML=`<div class="dhrow"><button class="dh" id="cTog" aria-expanded="${ui.cardsOpen}"><span>${esc(head)}</span><span>${ui.cardsOpen?'▾':'▸'}</span></button><button class="dhx" id="cComboTop" title="${esc(t('dock.combos'))}" aria-label="${esc(t('dock.combos'))}"><span class="dhxi">ⓘ</span><span class="dhxt">${esc(t('dock.combos'))}</span></button></div>
     <div class="db">
       ${h.length?`<div class="cards">${cards}</div>`:`<p class="note">${esc(t('dock.noCards'))}</p>`}
       ${btns?`<div class="row">${btns}</div>`:''}
