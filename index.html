@@ -11,8 +11,7 @@
 <link rel="apple-touch-icon" href="icons/icon-192.png">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <title>Borgo Fight</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Nunito+Sans:wght@400;700;800&family=Big+Shoulders+Stencil+Display:wght@700;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="fonts/fonts.css">
 <style>/* tema chiaro e scuro gestiti dal gioco: niente inversione automatica dei colori da parte del browser */
 :root{color-scheme:light dark}
 :root[data-theme="light"]{color-scheme:light}
@@ -1685,6 +1684,11 @@ Object.assign(I18N.en,{"rc.note": "This site is protected by reCAPTCHA and the G
 Object.assign(I18N.es,{"rc.note": "Este sitio está protegido por reCAPTCHA y se aplican la {p} y las {t} de Google.", "rc.priv": "Política de privacidad", "rc.terms": "Condiciones del servicio"});
 Object.assign(I18N.fr,{"rc.note": "Ce site est protégé par reCAPTCHA ; les {p} et les {t} de Google s’appliquent.", "rc.priv": "Règles de confidentialité", "rc.terms": "Conditions d’utilisation"});
 Object.assign(I18N.de,{"rc.note": "Diese Website ist durch reCAPTCHA geschützt; es gelten die {p} und die {t} von Google.", "rc.priv": "Datenschutzerklärung", "rc.terms": "Nutzungsbedingungen"});
+I18N.it['legal.online']="Giocando online accetti questi documenti";
+I18N.en['legal.online']="By playing online you accept these documents";
+I18N.es['legal.online']="Al jugar online aceptas estos documentos";
+I18N.fr['legal.online']="En jouant en ligne, tu acceptes ces documents";
+I18N.de['legal.online']="Wenn du online spielst, akzeptierst du diese Dokumente";
 </script>
 
 <script>// ===== Filtro parole (elenchi propri, 25 lingue): blocca insulti e parolacce anche mascherati =====
@@ -4182,8 +4186,9 @@ function renderModals(){
 async function loadObjective(){
   if(objLoading||!db||!me.id||!gameId) return; objLoading=true;
   try{
-    const ref=db.collection('data/users/'+me.id).doc('obj-'+gameId);
-    const snap=await ref.get();
+    const ref=db.doc(`games/${gameId}/secret/${me.id}`);
+    let snap=await ref.get();
+    if(!(snap.exists && OBJ[snap.data().obj])){ try{ const old=db.collection('data/users/'+me.id).doc('obj-'+gameId); const o=await old.get(); if(o.exists && OBJ[o.data().obj]){ await ref.set({obj:o.data().obj, at:o.data().at||Date.now()}); await old.delete(); snap=await ref.get(); } }catch(e){} }
     if(snap.exists && OBJ[snap.data().obj]) myObj=snap.data().obj;
     else { const myCol=(S.players[me.id]||{}).color, pool=objectivePool(S.settings).filter(x=>!(x.type==='destroy' && x.color===myCol)); const o=pool[rint(pool.length)].id; await ref.set({obj:o, at:Date.now()}); myObj=o; if(!MOBILE()) ui.objOpen=true; toast(t('toast.objDrawn')); }
     render();
@@ -4301,12 +4306,13 @@ const unb64=s=>Uint8Array.from(atob(s),c=>c.charCodeAt(0));
 async function ensureKeys(){
   if(!window.crypto?.subtle||!db||!me.id) return;
   try{
-    const ref=db.doc('data/users/'+me.id+'/keys'); const snap=await ref.get(); let pubJwk;
-    if(snap.exists){ const d=clone(snap.data()); chat.priv=await crypto.subtle.importKey('jwk',d.priv,EC,false,['deriveKey']); pubJwk=d.pub; }
+    const ref=db.doc('userkeys/'+me.id); let snap=await ref.get(); let pubJwk;
+    if(!snap.exists){ try{ const old=db.doc('data/users/'+me.id+'/keys'); const o=await old.get(); if(o.exists){ await ref.set(clone(o.data())); await old.delete(); snap=await ref.get(); } }catch(e){} }
+    if(snap.exists){ const d=clone(snap.data()); delete d.expireAt; chat.priv=await crypto.subtle.importKey('jwk',d.priv,EC,false,['deriveKey']); pubJwk=d.pub; ref.set({priv:d.priv,pub:d.pub}).catch(()=>{}); }
     else { const kp=await crypto.subtle.generateKey(EC,true,['deriveKey']); const privJwk=await crypto.subtle.exportKey('jwk',kp.privateKey);
       pubJwk=await crypto.subtle.exportKey('jwk',kp.publicKey); await ref.set({priv:privJwk,pub:pubJwk}); chat.priv=kp.privateKey; }
     const pref=db.doc('pubkeys/'+me.id); const ps=await pref.get();
-    if(!ps.exists || ps.data().jwk?.x!==pubJwk.x) await pref.set({jwk:pubJwk});
+    await pref.set({jwk:pubJwk});   // ogni visita rinnova la scadenza a 30 giorni
   }catch(e){ chat.priv=null; }
 }
 async function peerKey(pid){
@@ -4463,7 +4469,7 @@ function renderHome(){
         const lbl=g.status==='lobby'?t('b.openLobby'):mineIn&&g.status==='playing'?t('b.resume'):t('b.watch');
         return `<div class="game"><span><b>${esc(g.name||'')}</b><br><small style="color:var(--muted)">${esc(st)}</small></span><span class="gbtns"><button class="btn" data-open="${esc(g.gid)}">${esc(lbl)}</button>${(g.hostId===me.id||isAdmin)?`<button class="btn danger" data-gdel="${esc(g.gid)}" aria-label="${esc(t('lobby.del'))}" title="${esc(t('lobby.del'))}">🗑</button>`:''}</span></div>`; }).join('')
         : `<p class="note">${esc(t('online.none'))}</p>`}</div>
-      <button class="btn primary" id="hNew" ${canWrite===false?'disabled':''}>${esc(t('online.create'))}</button><button class="btn" id="hTv">📺 ${esc(t('tv.btn'))}</button></div>`
+      <button class="btn primary" id="hNew" ${canWrite===false?'disabled':''}>${esc(t('online.create'))}</button><button class="btn" id="hTv">📺 ${esc(t('tv.btn'))}</button></div>${BORGO_CONFIG.platform!=='claude'?`<p class="rcnote legalnote">${esc(t('legal.online'))}: <a href="terms.html" target="_blank" rel="noopener">${esc(t('legal.terms'))}</a> · <a href="privacy.html" target="_blank" rel="noopener">${esc(t('legal.privacy'))}</a></p>`:''}`
     : `<div class="box"><h2>${esc(t('online.title'))}</h2><p class="note">${esc(t(BORGO_CONFIG.platform==='claude'?'online.off':'online.offWeb'))}</p></div>`;
   const savedH = saved.length ? `<h4>${esc(t('saves.title'))}</h4><div class="games">${saved.map(([id,x])=>{
       const names=x.state.order.map(p=>x.state.players[p].name).join(', ');
@@ -4637,6 +4643,7 @@ function renderLobby(){
       ${inLobby?`<button class="btn" id="lLeave">${esc(t('lobby.leave'))}</button>`:''}
       <button class="btn" id="lBack">${esc(t('lobby.back'))}</button>
       ${host||isAdmin?`<button class="btn danger" id="lDel">${esc(t('lobby.del'))}</button>`:''}
+      ${BORGO_CONFIG.platform!=='claude'?`<p class="rcnote legalnote">${esc(t('legal.online'))}: <a href="terms.html" target="_blank" rel="noopener">${esc(t('legal.terms'))}</a> · <a href="privacy.html" target="_blank" rel="noopener">${esc(t('legal.privacy'))}</a></p>`:''}
     </div>
     ${n===2?`<p class="note">${esc(t('setup.two'))}</p>`:''}`);
   if(focused==='gName') $('#gName')?.focus(); if(focused==='gArmy'){ const a=$('#gArmy'); a?.focus(); a&&a.setSelectionRange(a.value.length,a.value.length); }
